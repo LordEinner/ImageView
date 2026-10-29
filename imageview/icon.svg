@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f0645a"/>
+      <stop offset="0.55" stop-color="#d2372f"/>
+      <stop offset="1" stop-color="#9e1f1b"/>
+    </linearGradient>
+    <linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="photo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#f3dcda"/>
+    </linearGradient>
+  </defs>
+  <!-- tile -->
+  <rect x="16" y="20" width="224" height="216" rx="28" fill="#000" opacity="0.25"/>
+  <rect x="16" y="16" width="224" height="216" rx="28" fill="url(#body)"/>
+  <rect x="16" y="16" width="224" height="216" rx="28" fill="none" stroke="#7a1512" stroke-opacity="0.5" stroke-width="2"/>
+  <path d="M44 16 H212 A28 28 0 0 1 240 44 V108 Q128 132 16 108 V44 A28 28 0 0 1 44 16 Z" fill="url(#gloss)"/>
+  <!-- picture -->
+  <g>
+    <rect x="52" y="67" width="152" height="120" rx="10" fill="#5a0d0b" opacity="0.35"/>
+    <rect x="52" y="62" width="152" height="120" rx="10" fill="url(#photo)"/>
+    <circle cx="160" cy="96" r="15" fill="#e8463d"/>
+    <path d="M64 170 L106 116 L134 150 L152 130 L192 170 Z" fill="#b92a24"/>
+    <path d="M106 116 L134 150 L124 162 L64 170 Z" fill="#8f1b17" opacity="0.35"/>
+  </g>
+</svg>

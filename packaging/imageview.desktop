@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=ImageView
+Comment=Simple image viewer
+Exec=imageview %F
+Icon=imageview
+Terminal=false
+Categories=Graphics;Viewer;
+MimeType=image/png;image/jpeg;image/gif;image/webp;image/bmp;image/tiff;image/avif;image/heic;image/heif;image/svg+xml;image/x-icon;image/x-tga;image/x-portable-pixmap;image/x-portable-graymap;image/x-portable-bitmap;image/qoi;image/jp2;image/vnd.adobe.photoshop;
