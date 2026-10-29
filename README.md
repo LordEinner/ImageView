@@ -20,7 +20,7 @@ From source: `python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 | Esc | Leave fullscreen, or quit |
 | Left / Right | Previous / next image in folder (wraps around) |
 | Wheel, pinch, + / - / 0 | Zoom in / out / fit (the zoom % field opens a slider; double-click it to type) |
-| Left-drag | Select area · right-drag: pan |
+| Left-drag / right-drag | Select area / pan · right-click: menu |
 | Ctrl+C | Copy selection, or the whole image |
 | Ctrl+Y / Ctrl+R | Crop to selection / resize |
 | L / R, H / V | Rotate left / right, flip horizontal / vertical |

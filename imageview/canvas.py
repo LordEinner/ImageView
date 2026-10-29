@@ -2,7 +2,7 @@
 
 from PySide6.QtCore import QEvent, QPoint, QPointF, QRect, QRectF, QSizeF, Qt, QTimer, Signal
 from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen, QPixmap
-from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QApplication, QWidget
 
 MIN_ZOOM = 0.01
 MAX_ZOOM = 64.0
@@ -14,6 +14,7 @@ CURSOR_HIDE_MS = 1500
 class ImageCanvas(QWidget):
     viewChanged = Signal()
     doubleClicked = Signal()
+    contextMenuRequested = Signal(QPoint)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -31,6 +32,8 @@ class ImageCanvas(QWidget):
         self._sel_start = None
         self._pan_start = None
         self._pan_offset = QPointF()
+        self._pan_button = None
+        self._panned = False
         self._cache = None
         self._cache_key = None
         self._cursor_timer = QTimer(self, singleShot=True, interval=CURSOR_HIDE_MS)
@@ -221,17 +224,17 @@ class ImageCanvas(QWidget):
         return super().event(e)
 
     def mousePressEvent(self, e):
-        if self._image is None:
-            return
-        if e.button() == Qt.MouseButton.LeftButton:
+        if e.button() in (Qt.MouseButton.RightButton, Qt.MouseButton.MiddleButton):
+            # Becomes a pan once the mouse moves; a right click without moving opens the menu.
+            self._pan_start = e.position()
+            self._pan_offset = QPointF(self._offset)
+            self._pan_button = e.button()
+            self._panned = False
+        elif e.button() == Qt.MouseButton.LeftButton and self._image is not None:
             self._sel_start = self._to_image(e.position())
             self._selection = QRect()
             self.update()
             self.viewChanged.emit()
-        elif e.button() in (Qt.MouseButton.RightButton, Qt.MouseButton.MiddleButton):
-            self._pan_start = e.position()
-            self._pan_offset = QPointF(self._offset)
-            self.setCursor(Qt.CursorShape.ClosedHandCursor)
 
     def mouseMoveEvent(self, e):
         if self._fullscreen and self._pan_start is None:
@@ -245,7 +248,13 @@ class ImageCanvas(QWidget):
             self.update()
             self.viewChanged.emit()
         elif self._pan_start is not None:
-            self._offset = self._pan_offset + (e.position() - self._pan_start)
+            delta = e.position() - self._pan_start
+            if not self._panned:
+                if delta.manhattanLength() < QApplication.startDragDistance():
+                    return
+                self._panned = True
+                self.setCursor(Qt.CursorShape.ClosedHandCursor)
+            self._offset = self._pan_offset + delta
             self._clamp_offset()
             self.update()
 
@@ -256,10 +265,15 @@ class ImageCanvas(QWidget):
                 self._selection = QRect()
                 self.update()
                 self.viewChanged.emit()
-        elif e.button() in (Qt.MouseButton.RightButton, Qt.MouseButton.MiddleButton):
+        elif e.button() == self._pan_button:
+            if e.button() == Qt.MouseButton.RightButton and not self._panned:
+                self.contextMenuRequested.emit(e.globalPosition().toPoint())
             self._pan_start = None
+            self._pan_button = None
             self.unsetCursor()
 
     def mouseDoubleClickEvent(self, e):
         if e.button() == Qt.MouseButton.LeftButton:
             self.doubleClicked.emit()
+        else:
+            super().mouseDoubleClickEvent(e)

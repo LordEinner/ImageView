@@ -8,7 +8,7 @@ import sys
 from PySide6.QtCore import QSize, QUrl, Qt
 from PySide6.QtGui import QAction, QGuiApplication, QIcon, QImageReader, QKeySequence, QTransform
 from PySide6.QtWidgets import (
-    QApplication, QFileDialog, QInputDialog, QLabel, QMainWindow, QMessageBox, QSizePolicy, QToolBar, QWidget,
+    QApplication, QFileDialog, QInputDialog, QLabel, QMainWindow, QMenu, QMessageBox, QSizePolicy, QToolBar, QWidget,
 )
 
 from . import icons, imageio
@@ -55,6 +55,7 @@ class MainWindow(QMainWindow):
         self.canvas = ImageCanvas(self)
         self.canvas.viewChanged.connect(self._update_status)
         self.canvas.doubleClicked.connect(self.toggle_fullscreen)
+        self.canvas.contextMenuRequested.connect(self._show_context_menu)
         self.setCentralWidget(self.canvas)
         self.canvas.setFocus()
 
@@ -85,6 +86,7 @@ class MainWindow(QMainWindow):
         self.addToolBar(bar)
         self._toolbar = bar
         self._image_actions = []
+        self._actions = {}
         palette = self.palette()
 
         def action(icon_name, text, slot, shortcut=None, key_hint=None, needs_image=True):
@@ -100,6 +102,7 @@ class MainWindow(QMainWindow):
             self.addAction(a)
             if needs_image:
                 self._image_actions.append(a)
+            self._actions[icon_name] = a
             return a
 
         # Keys handled in keyPressEvent get only a tooltip hint, not a real
@@ -132,6 +135,21 @@ class MainWindow(QMainWindow):
         spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         bar.addWidget(spacer)
         action("fullscreen", "Fullscreen", self.toggle_fullscreen, key_hint="Enter", needs_image=False)
+
+    def _show_context_menu(self, pos):
+        menu = QMenu(self)
+        menu.setStyleSheet("QMenu::separator { height: 1px; background: palette(mid); margin: 5px 8px; }")
+        menu.addAction(self._actions["copy"])
+        menu.addSeparator()
+        for name in ("rotate-left", "rotate-right", "flip-horizontal", "flip-vertical"):
+            menu.addAction(self._actions[name])
+        menu.addSeparator()
+        palette = self.palette()
+        if self.isFullScreen():
+            menu.addAction(icons.icon("fullscreen", palette), "Exit Fullscreen\tEsc", self.toggle_fullscreen)
+        else:
+            menu.addAction(icons.icon("exit", palette), "Exit\tEsc", self.close)
+        menu.exec(pos)
 
     def _update_actions(self):
         has_image = self.canvas.image() is not None
