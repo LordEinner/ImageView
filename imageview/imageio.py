@@ -4,23 +4,16 @@ import os
 from dataclasses import dataclass
 from functools import cache
 
-from PIL import Image, ImageOps
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QImage, QImageReader, QImageWriter, QMovie, QPainter
 
-try:
-    import pillow_heif
-
-    pillow_heif.register_heif_opener()
-except ImportError:
-    pass
-
-Image.init()
-
-# Pillow formats that are stubs, vector-only or need external tools.
-_SKIP_EXTENSIONS = {
-    ".bufr", ".grib", ".h5", ".hdf", ".fit", ".fits", ".eps", ".ps", ".pdf",
-    ".wmf", ".emf", ".mpeg", ".mpg",
+# Extensions Qt can't read but Pillow / pillow-heif can. Listed statically so
+# scanning a folder doesn't have to import Pillow, which slows down startup.
+_PIL_EXTENSIONS = {
+    ".avif", ".avifs", ".heic", ".heics", ".heif", ".heifs", ".hif", ".psd",
+    ".jp2", ".j2k", ".j2c", ".jpc", ".jpf", ".jpx", ".qoi", ".dds", ".pcx",
+    ".sgi", ".rgb", ".rgba", ".bw", ".ras", ".dib", ".pnm", ".pfm", ".apng",
+    ".mpo", ".jpe", ".dcx", ".blp", ".msp",
 }
 
 # (filter name, extensions) offered in the Save As dialog, in display order.
@@ -50,6 +43,21 @@ _IJG_LUMA = [
 ]
 
 
+@cache
+def _pil():
+    """Import and initialize Pillow on first use."""
+    from PIL import Image
+
+    try:
+        import pillow_heif
+
+        pillow_heif.register_heif_opener()
+    except ImportError:
+        pass
+    Image.init()
+    return Image
+
+
 class LoadError(Exception):
     pass
 
@@ -73,11 +81,11 @@ def _qt_writable():
 @cache
 def readable_extensions():
     exts = {"." + f for f in _names(QImageReader.supportedImageFormats())}
-    exts |= {ext for ext, fmt in Image.registered_extensions().items() if fmt in Image.OPEN}
-    return frozenset(exts - _SKIP_EXTENSIONS)
+    return frozenset(exts | _PIL_EXTENSIONS)
 
 
 def _pil_save_format(ext):
+    Image = _pil()
     fmt = Image.registered_extensions().get("." + ext)
     return fmt if fmt in Image.SAVE else None
 
@@ -102,6 +110,8 @@ def can_save(ext):
 
 
 def pil_to_qimage(pil):
+    from PIL import ImageOps
+
     pil = ImageOps.exif_transpose(pil)
     if pil.mode != "RGBA":
         pil = pil.convert("RGBA")
@@ -114,7 +124,7 @@ def qimage_to_pil(img):
     has_alpha = img.hasAlphaChannel()
     img = img.convertToFormat(QImage.Format.Format_RGBA8888)
     data = bytes(img.constBits())[: img.sizeInBytes()]
-    pil = Image.frombuffer("RGBA", (img.width(), img.height()), data, "raw", "RGBA", img.bytesPerLine(), 1)
+    pil = _pil().frombuffer("RGBA", (img.width(), img.height()), data, "raw", "RGBA", img.bytesPerLine(), 1)
     return pil if has_alpha else pil.convert("RGB")
 
 
@@ -135,7 +145,7 @@ def load(path):
             return Loaded(image=image, format=fmt)
         error = reader.errorString()
     try:
-        with Image.open(path) as pil:
+        with _pil().open(path) as pil:
             pil.load()
             return Loaded(image=pil_to_qimage(pil), format=pil.format or "")
     except Exception as e:
@@ -150,7 +160,7 @@ def estimate_quality(path):
     Other formats don't record their quality.
     """
     try:
-        with Image.open(path) as pil:
+        with _pil().open(path) as pil:
             if pil.format == "JPEG" and pil.quantization:
                 table = pil.quantization.get(0) or next(iter(pil.quantization.values()))
                 if max(table) == 1:

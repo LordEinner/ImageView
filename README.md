@@ -8,6 +8,7 @@ Can crop, resize, rotate, flip and save to the common formats.
 
     ./build_appimage.sh                      # needs appimagetool on PATH
     ./ImageView-x86_64.AppImage [image]
+    ./install_local.sh                       # optional: install unpacked (starts ~2× faster) + menu entry
 
 From source: `python3 -m venv .venv && .venv/bin/pip install -r requirements.txt && .venv/bin/python run.py [image]`
 

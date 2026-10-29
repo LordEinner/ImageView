@@ -50,7 +50,7 @@ def icon(name, palette):
         disabled = QColor(*(round(n * 0.4 + b * 0.6) for n, b in
                             zip(normal.getRgb()[:3], bg.getRgb()[:3])))
     result = QIcon()
-    for size in (16, 22, 24, 32, 44, 48, 64):
+    for size in (22, 44):  # toolbar size, and 2× for HiDPI
         result.addPixmap(_render(name, normal, size), QIcon.Mode.Normal)
         result.addPixmap(_render(name, disabled, size), QIcon.Mode.Disabled)
     return result

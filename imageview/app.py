@@ -191,7 +191,7 @@ class MainWindow(QMainWindow):
             self.canvas.clear(f"Cannot open {os.path.basename(self._path)}\n\n{e}")
         else:
             self._format = loaded.format
-            self._quality = imageio.estimate_quality(self._path) or DEFAULT_QUALITY
+            self._quality = DEFAULT_QUALITY
             if loaded.movie is not None:
                 self.canvas.set_movie(loaded.movie)
             else:
@@ -234,7 +234,7 @@ class MainWindow(QMainWindow):
         if self.canvas.is_animated():
             msg += "\n\nOnly the current frame of the animation will be saved."
         if QMessageBox.question(self, "Save", msg) == QMessageBox.StandardButton.Yes:
-            self._write(img, self._path, self._quality)
+            self._write(img, self._path, self._file_quality())
 
     def save_as(self):
         img = self.canvas.image()
@@ -254,13 +254,17 @@ class MainWindow(QMainWindow):
         if not ext:
             ext = dict(filters).get(chosen, "png")
             path = f"{path}.{ext}"
-        quality = self._quality
+        quality = self._file_quality()
         if ext in imageio.LOSSY_EXTENSIONS:
             quality, ok = QInputDialog.getInt(self, "Save As", "Quality (1–100):", quality, 1, 100)
             if not ok:
                 return
             self._quality = quality
         self._write(img, path, quality)
+
+    def _file_quality(self):
+        """Quality of the file on disk, else the last one chosen in Save As."""
+        return imageio.estimate_quality(self._path) or self._quality
 
     def _write(self, img, path, quality):
         ext = os.path.splitext(path)[1].lower().lstrip(".")
