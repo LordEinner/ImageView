@@ -140,6 +140,8 @@ class MainWindow(QMainWindow):
         menu = QMenu(self)
         menu.setStyleSheet("QMenu::separator { height: 1px; background: palette(mid); margin: 5px 8px; }")
         menu.addAction(self._actions["copy"])
+        if not self.canvas.selection().isEmpty():
+            menu.addAction(self._actions["crop"])
         menu.addSeparator()
         for name in ("rotate-left", "rotate-right", "flip-horizontal", "flip-vertical"):
             menu.addAction(self._actions[name])
