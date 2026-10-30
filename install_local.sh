@@ -16,7 +16,7 @@ rm -rf "$DEST"
 mkdir -p "$(dirname "$DEST")" "$APPS" "$ICONS"
 mv "$tmp/squashfs-root" "$DEST"
 
-cp imageview/icon.svg "$ICONS/imageview.svg"
+cp src/icon.svg "$ICONS/imageview.svg"
 sed "s|^Exec=.*|Exec=$DEST/AppRun %F|" packaging/imageview.desktop > "$APPS/imageview.desktop"
 update-desktop-database "$APPS" 2>/dev/null || true
 command -v kbuildsycoca6 >/dev/null && kbuildsycoca6 >/dev/null 2>&1 || true
