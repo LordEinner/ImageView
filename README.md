@@ -1,7 +1,7 @@
 # ImageView
 
 A simple, fast image viewer for Linux in the spirit of IrfanView, written in C++ with Qt 6 and packaged as an AppImage.
-Opens JPEG, PNG, GIF and WebP (including animations), TIFF, BMP and more; AVIF, HEIC, JPEG XL, PSD, QOI etc.
+Opens JPEG, PNG, GIF and WebP (including animations), TIFF, BMP and more; AVIF, JPEG XL, PSD, QOI etc.
 come from [KImageFormats](https://invent.kde.org/frameworks/kimageformats) when it is installed at build time.
 Can crop, resize, rotate and flip (with undo) and save to the common formats, including AVIF and JPEG XL.
 
@@ -9,7 +9,6 @@ Can crop, resize, rotate and flip (with undo) and save to the common formats, in
 
 Needs CMake, a C++20 compiler and the Qt 6 Widgets and Svg development files
 (Fedora: `sudo dnf install cmake ninja-build gcc-c++ qt6-qtbase-devel qt6-qtsvg-devel kf6-kimageformats`).
-HEIC needs a libheif built with an HEVC decoder; Fedora's isn't, so also install `libheif-freeworld` from RPM Fusion.
 
     ./build_appimage.sh                      # needs appimagetool on PATH
     ./ImageView-x86_64.AppImage [image]

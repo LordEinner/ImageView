@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Builds ImageView-x86_64.AppImage. Requires CMake, a C++20 compiler, the Qt 6
 # Widgets/Svg development files and appimagetool on PATH. Install KImageFormats
-# (kf6-kimageformats / kimageformats6) first for AVIF, HEIC, JPEG XL, PSD etc.
+# (kf6-kimageformats / kimageformats6) first for AVIF, JPEG XL, PSD etc.
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -25,9 +25,10 @@ for dir in "${PLUGIN_DIRS[@]}"; do
     [ -d "$QT_PLUGINS/$dir" ] && cp -r "$QT_PLUGINS/$dir" AppDir/usr/plugins/
 done
 # The KDE and GTK themes and the PDF "image" plugin drag in large frameworks,
-# and these platforms aren't for desktops.
+# HEIF/HEIC isn't supported (its HEVC codec is patent-encumbered), and these
+# platforms aren't for desktops.
 rm -f AppDir/usr/plugins/platformthemes/{KDEPlasmaPlatformTheme*,libqgtk3}.so \
-    AppDir/usr/plugins/imageformats/libqpdf.so \
+    AppDir/usr/plugins/imageformats/{libqpdf,kimg_heif}.so \
     AppDir/usr/plugins/platforminputcontexts/libqtvirtualkeyboardplugin.so \
     AppDir/usr/plugins/platforms/lib{qeglfs,qlinuxfb,qminimalegl,qvkkhrdisplay,qvnc}.so
 

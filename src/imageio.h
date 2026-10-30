@@ -1,5 +1,5 @@
 // Image loading and saving through Qt's image plugins (plus KImageFormats,
-// when installed, for AVIF, HEIC, JPEG XL, PSD, QOI and more).
+// when installed, for AVIF, JPEG XL, PSD, QOI and more).
 #pragma once
 
 #include <QImage>
@@ -18,7 +18,7 @@ struct Loaded {
     QString format;
 };
 
-inline const QSet<QString> LossyExtensions = {"jpg", "jpeg", "webp", "avif", "heic", "jxl"};
+inline const QSet<QString> LossyExtensions = {"jpg", "jpeg", "webp", "avif", "jxl"};
 
 // Lowercase extensions with a leading dot, e.g. ".png".
 const QSet<QString> &readableExtensions();

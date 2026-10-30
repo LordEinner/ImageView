@@ -17,7 +17,7 @@ namespace {
 // The reader decides the format from content, so these open fine.
 const QHash<QString, QString> ExtensionAliases = {
     {"jpe", "jpeg"}, {"jfif", "jpeg"}, {"mpo", "jpeg"}, {"apng", "png"}, {"dib", "bmp"},
-    {"hif", "heif"}, {"heics", "heic"}, {"heifs", "heif"}, {"avifs", "avif"},
+    {"avifs", "avif"},
     {"j2k", "jp2"}, {"j2c", "jp2"}, {"jpc", "jp2"}, {"jpf", "jp2"}, {"jpx", "jp2"},
     {"pnm", "ppm"}, {"rgba", "rgb"}, {"bw", "rgb"},
 };
@@ -28,7 +28,6 @@ const QList<QPair<QString, QStringList>> SaveChoices = {
     {"JPEG", {"jpg", "jpeg"}},
     {"WebP", {"webp"}},
     {"AVIF", {"avif"}},
-    {"HEIC", {"heic"}},
     {"JPEG XL", {"jxl"}},
     {"TIFF", {"tif", "tiff"}},
     {"BMP", {"bmp"}},
