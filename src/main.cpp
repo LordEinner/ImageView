@@ -4,6 +4,7 @@
 #include <QUrl>
 
 #include "mainwindow.h"
+#include "platform.h"
 
 int main(int argc, char *argv[])
 {
@@ -12,6 +13,7 @@ int main(int argc, char *argv[])
     app.setApplicationName(MainWindow::AppName);
     app.setDesktopFileName("imageview");
     app.setWindowIcon(QIcon(":/icon.svg"));
+    platform::followColorScheme();
 
     QString path;
     const QStringList args = app.arguments();

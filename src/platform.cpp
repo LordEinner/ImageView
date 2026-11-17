@@ -1,10 +1,13 @@
 #include "platform.h"
 
+#include <QApplication>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QSettings>
+#include <QStyle>
+#include <QStyleHints>
 #include <QVariant>
 #include <QWidget>
 
@@ -47,6 +50,22 @@ bool platform::confirm(QWidget *parent, const QString &title, const QString &que
 QString platform::trashName()
 {
     return QStringLiteral("Recycle Bin");
+}
+
+void platform::followColorScheme()
+{
+    static const QString native = QApplication::style()->name();
+    // Native styles that can't draw dark widgets.
+    if (native.compare("windowsvista", Qt::CaseInsensitive) != 0)
+        return;
+    auto apply = [] {
+        const bool dark = QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark;
+        const QString wanted = dark ? QStringLiteral("fusion") : native;
+        if (QApplication::style()->name().compare(wanted, Qt::CaseInsensitive) != 0)
+            QApplication::setStyle(wanted);
+    };
+    apply();
+    QObject::connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, qApp, apply);
 }
 
 bool platform::canTrash(const QString &path)
@@ -112,6 +131,8 @@ QString platform::trashName()
 {
     return QStringLiteral("Trash");
 }
+
+void platform::followColorScheme() {}
 
 bool platform::canTrash(const QString &)
 {

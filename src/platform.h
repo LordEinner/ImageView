@@ -11,6 +11,12 @@ namespace platform {
 // task dialog on Windows and a QMessageBox elsewhere.
 bool confirm(QWidget *parent, const QString &title, const QString &question, const QString &details);
 
+// Makes the widget style follow the system's light/dark app mode, now and
+// when it changes. Windows 10's native style can only draw light widgets, so
+// Fusion (which uses the system's dark palette) stands in while Windows is
+// dark. Elsewhere the native style already follows the desktop; no-op.
+void followColorScheme();
+
 // What the desktop calls its trash: "Recycle Bin" on Windows, else "Trash".
 QString trashName();
 

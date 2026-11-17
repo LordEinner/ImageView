@@ -212,6 +212,7 @@ void MainWindow::buildToolbar()
     action("zoom-out", "Zoom Out", [this] { m_canvas->zoomBy(1 / ZoomStep); }, {}, "-");
     auto reset = new QAction(icons::icon("zoom-reset", pal), "Reset Zoom", this);
     reset->setToolTip("Reset Zoom (0)");
+    m_actions["zoom-reset"] = reset;
     connect(reset, &QAction::triggered, m_canvas, &ImageCanvas::resetZoom);
     m_zoomField = new ZoomField(reset, this);
     connect(m_zoomField, &ZoomField::zoomRequested, m_canvas, &ImageCanvas::setZoom);
@@ -260,6 +261,18 @@ void MainWindow::updateActions()
     m_actions["delete"]->setEnabled(m_onDisk);
     m_zoomField->setEnabled(hasImage);
     m_zoomField->setZoom(m_canvas->zoom());
+}
+
+// Icons are drawn in the palette's text color, so redraw them when the
+// light/dark scheme (and with it the palette or style) changes.
+void MainWindow::changeEvent(QEvent *e)
+{
+    QMainWindow::changeEvent(e);
+    if (e->type() == QEvent::PaletteChange || e->type() == QEvent::StyleChange) {
+        const QPalette pal = palette();
+        for (auto it = m_actions.cbegin(); it != m_actions.cend(); ++it)
+            it.value()->setIcon(icons::icon(it.key(), pal));
+    }
 }
 
 // --- keyboard --------------------------------------------------------------

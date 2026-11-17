@@ -18,6 +18,8 @@ so AVIF, JPEG XL, PSD and QOI aren't available there.
     .\install_windows.ps1                    # optional: per-user install, Start menu, "Open with"
     .\install_windows.ps1 -Uninstall
 
+The window follows Windows' light/dark app mode (Settings > Personalization > Colors), switching live.
+
 If scripts are blocked, run them with `powershell -ExecutionPolicy Bypass -File .\build_windows.ps1`.
 
 ## Build and run on Linux

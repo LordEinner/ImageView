@@ -25,6 +25,7 @@ public:
 
 protected:
     void keyPressEvent(QKeyEvent *e) override;
+    void changeEvent(QEvent *e) override;
     void dragEnterEvent(QDragEnterEvent *e) override;
     void dropEvent(QDropEvent *e) override;
 
