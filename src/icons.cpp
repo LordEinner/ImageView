@@ -23,6 +23,8 @@ const QHash<QString, QString> &shapes()
         {"undo", R"(<path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>)"},
         {"copy",R"(<rect x="9" y="9" width="12" height="12" rx="2"/>)"
                  R"(<path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/>)"},
+        {"paste", R"(<rect x="8" y="2" width="8" height="4" rx="1"/>)"
+                  R"(<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>)"},
         {"crop", R"(<path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/>)"},
         {"resize", R"(<path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/>)"},
         {"rotate-left", R"(<path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5"/>)"},

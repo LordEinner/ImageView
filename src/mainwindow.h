@@ -45,6 +45,7 @@ private:
     void crop();
     void resizeImage();
     void copy();
+    void paste();
 
     void updateTitle();
     void updateStatus();

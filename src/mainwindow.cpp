@@ -14,6 +14,7 @@
 #include <QMessageBox>
 #include <QMimeData>
 #include <QScreen>
+#include <QStandardPaths>
 #include <QStatusBar>
 #include <QToolBar>
 #include <QTransform>
@@ -141,7 +142,7 @@ MainWindow::MainWindow(const QString &path, QWidget *parent) : QMainWindow(paren
     if (!path.isEmpty()) {
         openPath(path);
     } else {
-        m_canvas->clear("Open an image with Ctrl+O or drop one here");
+        m_canvas->clear("Open an image with Ctrl+O, paste one with Ctrl+V or drop one here");
         updateTitle();
         updateStatus();
     }
@@ -196,6 +197,7 @@ void MainWindow::buildToolbar()
     bar->addSeparator();
     action("undo", "Undo", [this] { undo(); }, QKeySequence::Undo);
     action("copy", "Copy", [this] { copy(); }, QKeySequence::Copy);
+    action("paste", "Paste", [this] { paste(); }, QKeySequence::Paste, {}, false);
     action("crop", "Crop to Selection", [this] { crop(); }, QKeySequence("Ctrl+Y"));
     action("resize", "Resize", [this] { resizeImage(); }, QKeySequence("Ctrl+R"));
     bar->addSeparator();
@@ -226,6 +228,7 @@ void MainWindow::showContextMenu(QPoint pos)
     if (!m_undo.empty())
         menu.addAction(m_actions["undo"]);
     menu.addAction(m_actions["copy"]);
+    menu.addAction(m_actions["paste"]);
     if (!m_canvas->selection().isEmpty())
         menu.addAction(m_actions["crop"]);
     menu.addSeparator();
@@ -376,7 +379,7 @@ void MainWindow::save()
 {
     if (!m_canvas->hasImage())
         return;
-    if (!imageio::canSave(extension(m_path))) {
+    if (!imageio::canSave(extension(m_path)) || !QFileInfo::exists(m_path)) {
         saveAs();
         return;
     }
@@ -521,6 +524,54 @@ void MainWindow::copy()
         img = img.copy(sel);
     QApplication::clipboard()->setImage(img);
     statusBar()->showMessage(QString("Copied %1 × %2 to clipboard").arg(img.width()).arg(img.height()), 3000);
+}
+
+// Opens the clipboard image as a new, unsaved file. A file copied in a file
+// manager is opened directly instead.
+void MainWindow::paste()
+{
+    const QMimeData *mime = QApplication::clipboard()->mimeData();
+    if (!mime) {
+        statusBar()->showMessage("Clipboard is empty", 3000);
+        return;
+    }
+    if (!mime->hasImage() && mime->hasUrls()) {
+        for (const QUrl &url : mime->urls()) {
+            if (url.isLocalFile() && QFileInfo(url.toLocalFile()).isFile()) {
+                openPath(url.toLocalFile());
+                return;
+            }
+        }
+    }
+    const QImage img = qvariant_cast<QImage>(mime->imageData());
+    if (img.isNull()) {
+        statusBar()->showMessage("No image in clipboard", 3000);
+        return;
+    }
+
+    // Name it after the current folder (or Pictures), avoiding existing files,
+    // so Save As starts in a sensible place.
+    QString dir = m_path.isEmpty() ? QString() : QFileInfo(m_path).path();
+    if (dir.isEmpty() || !QFileInfo(dir).isDir()) {
+        dir = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
+        if (dir.isEmpty() || !QFileInfo(dir).isDir())
+            dir = QDir::homePath();
+    }
+    QString path = QDir(dir).filePath("Pasted image.png");
+    for (int n = 2; QFileInfo::exists(path); ++n)
+        path = QDir(dir).filePath(QString("Pasted image %1.png").arg(n));
+
+    m_path = path;
+    m_files.clear();
+    m_format.clear();
+    m_undo.clear();
+    m_savedDepth = -1; // never saved
+    m_modified = true;
+    m_quality = DefaultQuality;
+    m_canvas->setImage(img);
+    updateTitle();
+    updateStatus();
+    statusBar()->showMessage(QString("Pasted %1 × %2 from clipboard").arg(img.width()).arg(img.height()), 3000);
 }
 
 // --- status ----------------------------------------------------------------

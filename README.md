@@ -26,6 +26,7 @@ From source: `cmake -S . -B build -G Ninja && cmake --build build && build/image
 | Wheel, pinch, + / - / 0 | Zoom in / out / fit (the zoom % field opens a slider; double-click it to type) |
 | Left-drag / right-drag | Select area / pan · right-click: menu |
 | Ctrl+C | Copy selection, or the whole image |
+| Ctrl+V | Paste an image from the clipboard as a new, unsaved file |
 | Ctrl+Y / Ctrl+R | Crop to selection / resize |
 | Ctrl+Z | Undo the last crop, resize, rotation or flip |
 | L / R, H / V | Rotate left / right, flip horizontal / vertical |
