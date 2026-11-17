@@ -25,6 +25,9 @@ public:
     void setImage(const QImage &image);
     void setMovie(QMovie *movie); // takes ownership
     void clear(const QString &message = QString());
+    // Stops an animation on its current frame and closes the file it was
+    // read from (Windows can't delete a file that is still open).
+    void releaseFile();
 
     double zoom() const { return m_zoom; }
     QRect selection() const { return m_selection; }

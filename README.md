@@ -38,6 +38,7 @@ From source: `cmake -S . -B build -G Ninja && cmake --build build && build/image
 | Enter / double-click | Toggle fullscreen |
 | Esc | Leave fullscreen, or quit |
 | Left / Right | Previous / next image in folder (wraps around) |
+| Delete | Delete the current file (asks first) and show the next one; uses the Recycle Bin / Trash when there is one, otherwise deletes permanently |
 | Wheel, pinch, + / - / 0 | Zoom in / out / fit (the zoom % field opens a slider; double-click it to type) |
 | Left-drag / right-drag | Select area / pan · right-click: menu |
 | Ctrl+C | Copy selection, or the whole image |

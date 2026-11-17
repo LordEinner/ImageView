@@ -58,6 +58,17 @@ void ImageCanvas::clear(const QString &message)
     reset();
 }
 
+void ImageCanvas::releaseFile()
+{
+    if (!m_movie)
+        return;
+    m_movie->stop();
+    disconnect(m_movie, nullptr, this, nullptr);
+    delete m_movie; // now, not deleteLater(), so the file handle is closed
+    m_movie = nullptr;
+    update();
+}
+
 void ImageCanvas::stopMovie()
 {
     if (m_movie) {

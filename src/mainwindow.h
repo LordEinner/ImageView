@@ -35,6 +35,7 @@ private:
     void toggleFullscreen();
 
     void openDialog();
+    void deleteFile();
     void save();
     void saveAs();
     int fileQuality() const;
@@ -54,6 +55,7 @@ private:
     QStringList m_files;
     QString m_format;
     bool m_modified = false;
+    bool m_onDisk = false; // m_path is an existing file (not a new, unsaved paste)
     // Images before each edit, oldest first, and the undo depth matching the
     // file on disk (-1 once that state has been dropped or overwritten).
     std::deque<QImage> m_undo;

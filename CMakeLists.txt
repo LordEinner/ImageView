@@ -16,6 +16,7 @@ qt_add_executable(imageview
     src/zoomfield.cpp src/zoomfield.h
     src/resizedialog.cpp src/resizedialog.h
     src/icons.cpp src/icons.h
+    src/platform.cpp src/platform.h
 )
 qt_add_resources(imageview "resources" PREFIX "/" BASE src FILES src/icon.svg)
 
@@ -52,7 +53,8 @@ if(WIN32)
         COMMENT "Rendering imageview.ico"
         VERBATIM
     )
-    target_sources(imageview PRIVATE packaging/windows/imageview.rc "${app_ico}")
+    target_sources(imageview PRIVATE packaging/windows/imageview.rc "${app_ico}" packaging/windows/imageview.manifest)
+    target_link_libraries(imageview PRIVATE comctl32 shell32)
     set_source_files_properties(packaging/windows/imageview.rc PROPERTIES OBJECT_DEPENDS "${app_ico}")
     target_include_directories(imageview PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 

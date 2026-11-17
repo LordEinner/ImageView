@@ -20,7 +20,9 @@ const QHash<QString, QString> &shapes()
                     R"(<path d="M7 21v-7h5"/><path d="M14 22v-2.5l5.5-5.5 2.5 2.5-5.5 5.5z"/>)"},
         {"previous", R"(<path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/>)"},
         {"next", R"(<path d="M5 12h14"/><path d="M12 5l7 7-7 7"/>)"},
-        {"undo", R"(<path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>)"},
+        {"delete", R"(<path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/>)"
+                   R"(<path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/>)"},
+        {"undo",R"(<path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>)"},
         {"copy",R"(<rect x="9" y="9" width="12" height="12" rx="2"/>)"
                  R"(<path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/>)"},
         {"paste", R"(<rect x="8" y="2" width="8" height="4" rx="1"/>)"

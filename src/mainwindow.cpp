@@ -4,6 +4,7 @@
 #include <QClipboard>
 #include <QDir>
 #include <QDragEnterEvent>
+#include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QGuiApplication>
@@ -24,6 +25,7 @@
 #include "canvas.h"
 #include "icons.h"
 #include "imageio.h"
+#include "platform.h"
 #include "resizedialog.h"
 #include "zoomfield.h"
 
@@ -194,6 +196,7 @@ void MainWindow::buildToolbar()
     bar->addSeparator();
     action("previous", "Previous Image", [this] { navigate(-1); }, {}, "Left", false);
     action("next", "Next Image", [this] { navigate(1); }, {}, "Right", false);
+    action("delete", "Delete File", [this] { deleteFile(); }, {}, "Del", false);
     bar->addSeparator();
     action("undo", "Undo", [this] { undo(); }, QKeySequence::Undo);
     action("copy", "Copy", [this] { copy(); }, QKeySequence::Copy);
@@ -235,6 +238,10 @@ void MainWindow::showContextMenu(QPoint pos)
     for (const char *name : {"rotate-left", "rotate-right", "flip-horizontal", "flip-vertical"})
         menu.addAction(m_actions[name]);
     menu.addSeparator();
+    if (m_actions["delete"]->isEnabled()) {
+        menu.addAction(m_actions["delete"]);
+        menu.addSeparator();
+    }
     const QPalette pal = palette();
     if (isFullScreen())
         menu.addAction(icons::icon("fullscreen", pal), "Exit Fullscreen\tEsc", this, &MainWindow::toggleFullscreen);
@@ -250,6 +257,7 @@ void MainWindow::updateActions()
         a->setEnabled(hasImage);
     m_actions["undo"]->setEnabled(hasImage && !m_undo.empty());
     m_actions["crop"]->setEnabled(hasImage && !m_canvas->selection().isEmpty());
+    m_actions["delete"]->setEnabled(m_onDisk);
     m_zoomField->setEnabled(hasImage);
     m_zoomField->setZoom(m_canvas->zoom());
 }
@@ -290,6 +298,9 @@ void MainWindow::keyPressEvent(QKeyEvent *e)
     case Qt::Key_0:
         m_canvas->resetZoom();
         break;
+    case Qt::Key_Delete:
+        deleteFile();
+        break;
     default:
         QMainWindow::keyPressEvent(e);
     }
@@ -319,6 +330,7 @@ void MainWindow::toggleFullscreen()
 void MainWindow::openPath(const QString &path, std::optional<QStringList> files)
 {
     m_path = QFileInfo(path).absoluteFilePath();
+    m_onDisk = QFileInfo(m_path).isFile(); // a broken file can still be deleted
     m_files = files ? *files : listImages(QFileInfo(m_path).path());
     m_modified = false;
     m_undo.clear();
@@ -373,6 +385,72 @@ void MainWindow::openDialog()
                                                       QString("Images (%1);;All files (*)").arg(exts.join(' ')));
     if (!path.isEmpty())
         openPath(path);
+}
+
+// Deletes the current file after confirming, then shows the next image in the
+// folder. Uses the trash when there is one; otherwise, or when moving to the
+// trash fails, asks to delete permanently instead.
+void MainWindow::deleteFile()
+{
+    if (!m_onDisk || !QFileInfo(m_path).isFile())
+        return;
+    const QFileInfo info(m_path);
+    const QString name = info.fileName();
+    QStringList details;
+    if (m_canvas->hasImage()) {
+        const QImage &img = m_canvas->image();
+        details << QString("%1 × %2 %3").arg(img.width()).arg(img.height()).arg(m_format).trimmed();
+    }
+    details << humanSize(double(info.size()));
+    const QString about = details.join(", ") + (m_modified ? "\n\nUnsaved changes will be lost." : "");
+    const QString trash = platform::trashName();
+    const QString permanentQuestion = QString("Delete “%1” permanently?").arg(name);
+
+    bool permanent = !platform::canTrash(m_path);
+    if (permanent) {
+        if (!platform::confirm(this, "Delete File", permanentQuestion, about + "\n\nThis can't be undone."))
+            return;
+    } else if (!platform::confirm(this, "Delete File", QString("Move “%1” to the %2?").arg(name, trash), about)) {
+        return;
+    }
+
+    m_canvas->releaseFile();
+    if (!permanent) {
+        QString reason;
+        const platform::TrashResult result = platform::moveToTrash(this, m_path, &reason);
+        if (result == platform::TrashResult::Cancelled)
+            return;
+        if (result == platform::TrashResult::Failed) {
+            if (!platform::confirm(this, "Delete File", permanentQuestion,
+                                   QString("It can't be moved to the %1 (%2).\n\nThis can't be undone.").arg(trash, reason)))
+                return;
+            permanent = true;
+        }
+    }
+    QString done = QString("Moved %1 to the %2").arg(name, trash);
+    if (permanent) {
+        QFile file(m_path);
+        if (!file.remove()) {
+            QMessageBox::critical(this, "Delete failed", QString("Could not delete %1:\n%2").arg(name, file.errorString()));
+            return;
+        }
+        done = QString("Deleted %1").arg(name);
+    }
+
+    m_undo.clear();
+    m_modified = false;
+    if (listImages(info.path()).isEmpty()) {
+        m_path.clear();
+        m_onDisk = false;
+        m_files.clear();
+        m_format.clear();
+        m_canvas->clear("No more images in this folder");
+        updateTitle();
+        updateStatus();
+    } else {
+        navigate(1); // the current file is gone, so this opens the one after it
+    }
+    statusBar()->showMessage(done, 4000);
 }
 
 void MainWindow::save()
@@ -450,6 +528,7 @@ void MainWindow::write(const QImage &img, const QString &path, int quality)
         return;
     }
     m_path = path;
+    m_onDisk = true;
     m_files = listImages(QFileInfo(path).path());
     m_format = extension(path).toUpper();
     m_modified = false;
@@ -562,6 +641,7 @@ void MainWindow::paste()
         path = QDir(dir).filePath(QString("Pasted image %1.png").arg(n));
 
     m_path = path;
+    m_onDisk = false;
     m_files.clear();
     m_format.clear();
     m_undo.clear();
