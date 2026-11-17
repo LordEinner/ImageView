@@ -152,6 +152,16 @@ const QSet<QString> &imageio::readableExtensions()
     return exts;
 }
 
+const QSet<QString> &imageio::browsableExtensions()
+{
+    static const QSet<QString> exts = [] {
+        const QSet<QString> everyday = {".jpg", ".jpeg", ".jpe", ".jfif", ".png", ".apng", ".gif", ".webp",
+                                        ".bmp", ".dib", ".tif", ".tiff", ".avif", ".jxl"};
+        return QSet<QString>(everyday).intersect(readableExtensions());
+    }();
+    return exts;
+}
+
 const QList<QPair<QString, QString>> &imageio::saveFilters()
 {
     static const QList<QPair<QString, QString>> filters = [] {

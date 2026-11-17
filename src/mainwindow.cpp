@@ -87,7 +87,7 @@ int naturalCompare(QStringView a, QStringView b)
 
 QStringList listImages(const QString &directory)
 {
-    const QSet<QString> &exts = imageio::readableExtensions();
+    const QSet<QString> &exts = imageio::browsableExtensions();
     QStringList names;
     for (const QString &n : QDir(directory).entryList(QDir::Files | QDir::Hidden, QDir::Unsorted)) {
         const qsizetype dot = extensionDot(n);

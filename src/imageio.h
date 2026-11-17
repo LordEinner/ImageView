@@ -22,6 +22,10 @@ inline const QSet<QString> LossyExtensions = {"jpg", "jpeg", "webp", "avif", "jx
 
 // Lowercase extensions with a leading dot, e.g. ".png".
 const QSet<QString> &readableExtensions();
+// The readable extensions of everyday pictures (JPEG, PNG, GIF, WebP, BMP,
+// TIFF, AVIF, JPEG XL) that Left/Right step through. Other formats (PSD,
+// SVG, ICO, TGA...) still open directly but are skipped while browsing.
+const QSet<QString> &browsableExtensions();
 // (filter string, default extension) for writable formats, in display order.
 const QList<QPair<QString, QString>> &saveFilters();
 bool canSave(QString ext);

@@ -39,7 +39,7 @@ From source: `cmake -S . -B build -G Ninja && cmake --build build && build/image
 |---|---|
 | Enter / double-click | Toggle fullscreen |
 | Esc | Leave fullscreen, or quit |
-| Left / Right | Previous / next image in folder (wraps around) |
+| Left / Right | Previous / next picture in folder (wraps around); steps through JPEG, PNG, GIF, WebP, BMP, TIFF, AVIF and JPEG XL only — other formats (PSD, SVG, ICO, TGA...) open directly but are skipped |
 | Delete | Delete the current file (asks first) and show the next one; uses the Recycle Bin / Trash when there is one, otherwise deletes permanently |
 | Wheel, pinch, + / - / 0 | Zoom in / out / fit (the zoom % field opens a slider; double-click it to type) |
 | Left-drag / right-drag | Select area / pan · right-click: menu |
