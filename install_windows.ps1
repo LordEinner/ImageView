@@ -1,19 +1,38 @@
 <#
 .SYNOPSIS
-Installs ImageView for the current user (no admin rights needed): copies
-dist\ImageView to %LOCALAPPDATA%\Programs\ImageView, adds a Start menu shortcut
+Installs ImageView for the current user (no admin rights needed unless the
+destination needs them): copies dist\ImageView to the destination folder
+(default %LOCALAPPDATA%\Programs\ImageView), adds a Start menu shortcut
 and registers ImageView under "Open with" for image files, so it can be picked
 in Settings > Apps > Default apps. Run .\build_windows.ps1 first.
+
+.PARAMETER Destination
+Folder to install into, e.g. "D:\Program Files\ImageView". Defaults to the
+previous install location, or %LOCALAPPDATA%\Programs\ImageView. An existing
+folder is only replaced if it is empty or holds an earlier ImageView.
 
 .PARAMETER Uninstall
 Removes the installed files, shortcut and registry entries again.
 #>
-param([switch]$Uninstall)
+param([string]$Destination, [switch]$Uninstall)
 $ErrorActionPreference = 'Stop'
 Set-Location $PSScriptRoot
 
-$Dest = Join-Path $env:LOCALAPPDATA 'Programs\ImageView'
+$Previous = (Get-ItemProperty 'HKCU:\Software\ImageView' -ErrorAction SilentlyContinue).InstallDir
+$Dest = if ($Destination) { $Destination } elseif ($Previous) { $Previous } else { Join-Path $env:LOCALAPPDATA 'Programs\ImageView' }
+$Dest = [IO.Path]::GetFullPath($Dest).TrimEnd('\')
 $Exe = Join-Path $Dest 'ImageView.exe'
+
+# Never wipe a folder that isn't an ImageView install (e.g. a mistyped
+# "D:\Program Files").
+function Test-SafeToReplace($dir) {
+    if (-not (Test-Path $dir)) { return $true }
+    if (-not (Get-ChildItem -Force $dir | Select-Object -First 1)) { return $true }
+    return Test-Path (Join-Path $dir 'ImageView.exe')
+}
+if (-not (Test-SafeToReplace $Dest)) {
+    throw "$Dest exists and is not an ImageView install; refusing to replace it. Pick an empty or new folder."
+}
 $Shortcut = Join-Path ([Environment]::GetFolderPath('Programs')) 'ImageView.lnk'
 $ProgId = 'ImageView.Image'
 $Classes = 'HKCU:\Software\Classes'
@@ -44,6 +63,8 @@ Get-Process ImageView -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq
 Remove-Key $Dest
 New-Item -ItemType Directory -Force (Split-Path $Dest) | Out-Null
 Copy-Item -Recurse 'dist\ImageView' $Dest
+New-Item -Force 'HKCU:\Software\ImageView' | Out-Null
+Set-ItemProperty 'HKCU:\Software\ImageView' -Name 'InstallDir' -Value $Dest
 
 $shell = New-Object -ComObject WScript.Shell
 $lnk = $shell.CreateShortcut($Shortcut)
