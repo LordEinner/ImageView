@@ -5,3 +5,4 @@ AppDir/
 *.AppImage
 *.spec
 __pycache__/
+*.zip

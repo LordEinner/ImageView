@@ -1,11 +1,26 @@
 # ImageView
 
-A simple, fast image viewer for Linux in the spirit of IrfanView, written in C++ with Qt 6 and packaged as an AppImage.
+A simple, fast image viewer for Linux and Windows in the spirit of IrfanView, written in C++ with Qt 6,
+packaged as an AppImage on Linux and as a self-contained folder / zip on Windows.
 Opens JPEG, PNG, GIF and WebP (including animations), TIFF, BMP and more; AVIF, JPEG XL, PSD, QOI etc.
 come from [KImageFormats](https://invent.kde.org/frameworks/kimageformats) when it is installed at build time.
 Can crop, resize, rotate and flip (with undo) and save to the common formats, including AVIF and JPEG XL.
 
-## Build and run
+## Build and run on Windows
+
+Needs Visual Studio 2022 or its Build Tools with the "Desktop development with C++" workload
+(includes CMake and Ninja), and Qt 6.9+ for MSVC 2022 64-bit with the Qt Image Formats module
+(for WebP and TIFF), e.g. in `C:\Qt\6.11.3\msvc2022_64`. KImageFormats isn't bundled on Windows,
+so AVIF, JPEG XL, PSD and QOI aren't available there.
+
+    .\build_windows.ps1                      # finds C:\Qt\<newest>\msvc2022_64, or pass -QtDir
+    dist\ImageView\ImageView.exe [image]     # also zipped as ImageView-windows-x64.zip
+    .\install_windows.ps1                    # optional: per-user install, Start menu, "Open with"
+    .\install_windows.ps1 -Uninstall
+
+If scripts are blocked, run them with `powershell -ExecutionPolicy Bypass -File .\build_windows.ps1`.
+
+## Build and run on Linux
 
 Needs CMake, a C++20 compiler and the Qt 6 Widgets and Svg development files
 (Fedora: `sudo dnf install cmake ninja-build gcc-c++ qt6-qtbase-devel qt6-qtsvg-devel kf6-kimageformats`).
