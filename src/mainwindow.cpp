@@ -201,6 +201,7 @@ void MainWindow::buildToolbar()
     action("undo", "Undo", [this] { undo(); }, QKeySequence::Undo);
     action("copy", "Copy", [this] { copy(); }, QKeySequence::Copy);
     action("paste", "Paste", [this] { paste(); }, QKeySequence::Paste, {}, false);
+    bar->addSeparator();
     action("crop", "Crop to Selection", [this] { crop(); }, QKeySequence("Ctrl+Y"));
     action("resize", "Resize", [this] { resizeImage(); }, QKeySequence("Ctrl+R"));
     bar->addSeparator();
